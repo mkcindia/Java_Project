@@ -5,6 +5,7 @@ import models.Admin;
 import models.Customer;
 import models.Producer;
 import models.Product;
+import models.User;
 import services.ProductService;
 import billing.Bill;
 
@@ -16,134 +17,150 @@ public class Main {
         Database database = new Database();
         ProductService productService = new ProductService();
 
-        // Adding some initial users
-        Admin admin = new Admin("1", "Admin", "adminpass");
-        Producer producer = new Producer("2", "Producer", "producerpass");
-        Customer customer = new Customer("3", "Customer", "customerpass");
-
-        database.addUser(admin);
-        database.addUser(producer);
-        database.addUser(customer);
-
         while (true) {
             System.out.println("Welcome to E-mall Management System");
-            System.out.println("1. Login as Admin");
-            System.out.println("2. Login as Producer");
-            System.out.println("3. Login as Customer");
-            System.out.println("4. Exit");
+            System.out.println("1. Login");
+            System.out.println("2. Sign Up");
+            System.out.println("3. Exit");
 
-            int choice = getChoice(scanner, 1, 4);
+            int choice = getChoice(scanner, 1, 3);
 
             switch (choice) {
                 case 1:
-                    handleAdmin(scanner, database, productService);
+                    login(scanner, database, productService);
                     break;
                 case 2:
-                    handleProducer(scanner, database, productService);
+                    signUp(scanner, database);
                     break;
                 case 3:
-                    handleCustomer(scanner, database, productService);
-                    break;
-                case 4:
                     System.out.println("Exiting...");
                     return;
             }
         }
     }
 
-    private static void handleAdmin(Scanner scanner, Database database, ProductService productService) {
-        System.out.print("Enter Admin ID: ");
+    private static void login(Scanner scanner, Database database, ProductService productService) {
+        System.out.println("1. Login as Admin");
+        System.out.println("2. Login as Producer");
+        System.out.println("3. Login as Customer");
+
+        int choice = getChoice(scanner, 1, 3);
+
+        System.out.print("Enter User ID: ");
         String id = scanner.nextLine();
-        System.out.print("Enter Admin Password: ");
+        System.out.print("Enter Password: ");
         String password = scanner.nextLine();
 
-        Admin admin = (Admin) database.getUser(id);
-        if (admin != null && admin.getPassword().equals(password)) {
-            System.out.println("Admin logged in successfully.");
-            while (true) {
-                System.out.println("1. Add Product");
-                System.out.println("2. Remove Product");
-                System.out.println("3. Logout");
-
-                int choice = getChoice(scanner, 1, 3);
-
-                switch (choice) {
-                    case 1:
-                        addProduct(scanner, productService, database);
-                        break;
-                    case 2:
-                        removeProduct(scanner, productService, database);
-                        break;
-                    case 3:
-                        return;
-                }
+        User user = database.getUser(id);
+        if (user != null && user.getPassword().equals(password)) {
+            System.out.println(user.getClass().getSimpleName() + " logged in successfully.");
+            switch (choice) {
+                case 1:
+                    handleAdmin(scanner, database, productService, (Admin) user);
+                    break;
+                case 2:
+                    handleProducer(scanner, database, productService, (Producer) user);
+                    break;
+                case 3:
+                    handleCustomer(scanner, database, productService, (Customer) user);
+                    break;
             }
         } else {
-            System.out.println("Invalid Admin credentials.");
+            System.out.println("Invalid credentials.");
         }
     }
 
-    private static void handleProducer(Scanner scanner, Database database, ProductService productService) {
-        System.out.print("Enter Producer ID: ");
+    private static void signUp(Scanner scanner, Database database) {
+        System.out.println("1. Sign Up as Admin");
+        System.out.println("2. Sign Up as Producer");
+        System.out.println("3. Sign Up as Customer");
+
+        int choice = getChoice(scanner, 1, 3);
+
+        System.out.print("Enter User ID: ");
         String id = scanner.nextLine();
-        System.out.print("Enter Producer Password: ");
+        System.out.print("Enter Name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter Password: ");
         String password = scanner.nextLine();
 
-        Producer producer = (Producer) database.getUser(id);
-        if (producer != null && producer.getPassword().equals(password)) {
-            System.out.println("Producer logged in successfully.");
-            while (true) {
-                System.out.println("1. Add Product");
-                System.out.println("2. Remove Product");
-                System.out.println("3. Logout");
+        switch (choice) {
+            case 1:
+                Admin admin = new Admin(id, name, password);
+                database.addUser(admin);
+                break;
+            case 2:
+                Producer producer = new Producer(id, name, password);
+                database.addUser(producer);
+                break;
+            case 3:
+                Customer customer = new Customer(id, name, password);
+                database.addUser(customer);
+                break;
+        }
+        System.out.println("User registered successfully.");
+    }
 
-                int choice = getChoice(scanner, 1, 3);
+    private static void handleAdmin(Scanner scanner, Database database, ProductService productService, Admin admin) {
+        while (true) {
+            System.out.println("1. Add Product");
+            System.out.println("2. Remove Product");
+            System.out.println("3. Logout");
 
-                switch (choice) {
-                    case 1:
-                        addProduct(scanner, productService, database);
-                        break;
-                    case 2:
-                        removeProduct(scanner, productService, database);
-                        break;
-                    case 3:
-                        return;
-                }
+            int choice = getChoice(scanner, 1, 3);
+
+            switch (choice) {
+                case 1:
+                    addProduct(scanner, productService, database);
+                    break;
+                case 2:
+                    removeProduct(scanner, productService, database);
+                    break;
+                case 3:
+                    return;
             }
-        } else {
-            System.out.println("Invalid Producer credentials.");
         }
     }
 
-    private static void handleCustomer(Scanner scanner, Database database, ProductService productService) {
-        System.out.print("Enter Customer ID: ");
-        String id = scanner.nextLine();
-        System.out.print("Enter Customer Password: ");
-        String password = scanner.nextLine();
+    private static void handleProducer(Scanner scanner, Database database, ProductService productService, Producer producer) {
+        while (true) {
+            System.out.println("1. Add Product");
+            System.out.println("2. Remove Product");
+            System.out.println("3. Logout");
 
-        Customer customer = (Customer) database.getUser(id);
-        if (customer != null && customer.getPassword().equals(password)) {
-            System.out.println("Customer logged in successfully.");
-            while (true) {
-                System.out.println("1. View Products");
-                System.out.println("2. Buy Product");
-                System.out.println("3. Logout");
+            int choice = getChoice(scanner, 1, 3);
 
-                int choice = getChoice(scanner, 1, 3);
-
-                switch (choice) {
-                    case 1:
-                        viewProducts(productService);
-                        break;
-                    case 2:
-                        buyProduct(scanner, productService, customer);
-                        break;
-                    case 3:
-                        return;
-                }
+            switch (choice) {
+                case 1:
+                    addProduct(scanner, productService, database);
+                    break;
+                case 2:
+                    removeProduct(scanner, productService, database);
+                    break;
+                case 3:
+                    return;
             }
-        } else {
-            System.out.println("Invalid Customer credentials.");
+        }
+    }
+
+    private static void handleCustomer(Scanner scanner, Database database, ProductService productService, Customer customer) {
+        while (true) {
+            System.out.println("1. View Products");
+            System.out.println("2. Buy Product");
+            System.out.println("3. Logout");
+
+            int choice = getChoice(scanner, 1, 3);
+
+            switch (choice) {
+                case 1:
+                    viewProducts(productService);
+                    break;
+                case 2:
+                    buyProduct(scanner, productService, customer);
+                    break;
+                case 3:
+                    return;
+            }
         }
     }
 
@@ -172,15 +189,6 @@ public class Main {
         System.out.println("Product removed successfully.");
     }
 
-    // private static void viewProducts(ProductService productService) {
-    // productService.getProducts().forEach(product -> {
-    // System.out.println("ID: " + product.getId());
-    // System.out.println("Name: " + product.getName());
-    // System.out.println("Price: " + product.getPrice());
-    // System.out.println("Quantity: " + product.getQuantity());
-    // System.out.println("----------------------");
-    // });
-    // }
     private static void viewProducts(ProductService productService) {
         System.out.println("Available Products:");
         productService.getProducts().forEach(product -> {
