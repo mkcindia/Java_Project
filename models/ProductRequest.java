@@ -3,7 +3,7 @@ package models;
 public class ProductRequest {
     private String producerId;
     private Product product;
-    private String status; // pending, accepted, rejected
+    private String status;
 
     public ProductRequest(String producerId, Product product) {
         this.producerId = producerId;
